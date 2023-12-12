@@ -1,0 +1,20 @@
+substitutions:
+  name: gosund-dimmer
+  id_name: gosund_dimmer
+  friendly_name: Gosund Dimmer
+  name_add_mac_suffix: "true"
+
+<<: !include gosund/gosund_sw2_light.yaml
+
+api:
+
+ota:
+
+dashboard_import:
+  package_import_url: https://git.jim.sh/jim/esphome-provisioning/gosund-dimmer.yaml
+  import_full_config: true
+
+wifi:
+  ap:
+
+captive_portal:
