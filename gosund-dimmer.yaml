@@ -1,20 +1,124 @@
 substitutions:
   name: gosund-dimmer
-  id_name: gosund_dimmer
   friendly_name: Gosund Dimmer
   name_add_mac_suffix: "true"
 
-<<: !include gosund/gosund_sw2_light.yaml
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: ${name_add_mac_suffix}
+  platform: ESP8266
+  board: esp8285
+  includes:
+    - gosund/gosund_sw2_light.hpp
+    - gosund/gosund_sw2_light.cpp
+  project:
+    name: jim.gosund-dimmer
+    version: "1.0"
+
+  on_boot:
+    priority: 300
+    then:
+      - light.turn_on: gosund_wifi_status
+      - delay: 500ms
+      - while:
+          condition:
+            not:
+              wifi.connected
+          then:
+            - light.toggle: gosund_wifi_status
+            - delay: 500ms
+      - light.turn_off: gosund_wifi_status
+
+# Support logging, but not to UART (since it's used by dimmer)
+logger:
+  baud_rate: 0
 
 api:
 
 ota:
 
 dashboard_import:
-  package_import_url: https://git.jim.sh/jim/esphome-provisioning/gosund-dimmer.yaml
+  package_import_url: github://jimparis/esphome-provisioning/gosund-dimmer.yaml@main
   import_full_config: true
 
 wifi:
   ap:
 
 captive_portal:
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO4
+      inverted: true
+    id: button
+    on_press:
+      - light.toggle: gosund_light
+    on_click:
+      min_length: 5s
+      max_length: 10s
+      then:
+        - switch.turn_on: gosund_restart
+
+switch:
+  - platform: restart
+    name: Reboot ${friendly_name}
+    id: gosund_restart
+
+uart:
+  id: uart_bus
+  baud_rate: 115200
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+
+output:
+  - id: green_led
+    platform: gpio
+    pin: GPIO13
+    inverted: true
+  - id: white_led
+    platform: gpio
+    pin: GPIO12
+    inverted: true
+
+light:
+  - platform: custom
+    lambda: |-
+      auto light_out = new gosund::GosundLight(id(white_led));
+      App.register_component(light_out);
+      return {light_out};
+    lights:
+      - name: ${friendly_name}
+        id: gosund_light
+        gamma_correct: 1.0
+        default_transition_length: 0s
+  - platform: binary
+    id: gosund_wifi_status
+    output: green_led
+    restore_mode: ALWAYS_ON
+
+# Expose ESPHome version and wifi connection info
+text_sensor:
+  - platform: version
+    name: ${friendly_name} ESPHome Version
+
+  - platform: wifi_info
+    ip_address:
+      name: ${friendly_name} IP Address
+    ssid:
+      name: ${friendly_name} SSID
+    bssid:
+      name: ${friendly_name} BSSID
+
+# Expose uptime and wifi signal strength
+sensor:
+  - platform: uptime
+    name: ${friendly_name} Uptime
+    filters:
+      - throttle: 300s
+  - platform: wifi_signal
+    name: ${friendly_name} WiFi Signal
+    filters:
+      - delta: 0.01
+      - throttle: 300s

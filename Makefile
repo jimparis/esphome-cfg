@@ -1,6 +1,24 @@
+devices=$(foreach yaml,$(sort $(wildcard *.yaml)),$(basename $(yaml)))
+
 .PHONY: all
-all: venv
-	@echo TODO
+all: help
+
+.PHONY: help
+help:
+	@echo "Makefile targets:"
+	@printf "  %-20s Build all\n" "build"
+	@$(foreach d,$(devices),printf "  %-20s Build $d\n" "build-$d" ;)
+	@$(foreach d,$(devices),printf "  %-20s Build+flash $d\n" "flash-$d" ;)
+
+define device_rules
+.PHONY: flash-$1
+build-$1: venv
+	pipenv run esphome compile $1.yaml
+build:: build-$1
+flash-$1: venv
+	pipenv run esphome upload $1.yaml
+endef
+$(foreach d,$(devices),$(eval $(call device_rules,$d)))
 
 .PHONY: venv
 venv: .venv/pyvenv.cfg
