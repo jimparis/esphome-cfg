@@ -1,85 +1,72 @@
-#include "gosund_sw2_light.hpp"
+#include "gosund_sw2_light.h"
 
 namespace esphome {
-  namespace gosund {
-    static const char *TAG = "gosund.light.sw2";
-    static const byte ON_MASK = 0x80;
+namespace gosund_sw2 {
 
-    static const uint8_t MIN_VALUE = 0;
-    static const uint8_t MAX_VALUE = 100;
-    static const uint8_t MIN_PERCENT = 1;
+static const char *TAG = "gosund.light.sw2";
+static const byte ON_MASK = 0x80;
 
-    void GosundLight::setup() {
+static const uint8_t MIN_VALUE = 0;
+static const uint8_t MAX_VALUE = 100;
+
+light::LightTraits GosundSW2Output::get_traits() {
+  auto traits = light::LightTraits();
+  traits.set_supported_color_modes({light::ColorMode::BRIGHTNESS});
+  return traits;
+}
+
+void GosundSW2Output::write_state(light::LightState *state) {
+  // don't go into an infinite loop when set by touch
+  if (set_by_touch_) {
+    set_by_touch_ = false;
+    return;
+  }
+
+  auto values = state->current_values;
+  uint8_t output = (uint8_t) roundf(100 * values.get_brightness());
+  if (output > 100) {
+    output = 100;
+  }
+
+  if (values.get_state() > 0 && values.get_brightness() > 0) {
+    output += ON_MASK;
+    status_led_->turn_on();
+  } else {
+    status_led_->turn_off();
+  }
+
+  ESP_LOGD(TAG, "write_state() called with state: %0.1f, brightness: %.02f => output: %02X",
+           values.get_state(), values.get_brightness(), output);
+
+  this->write_byte(output);
+}
+
+void GosundSW2Output::loop() {
+  // pattern is 0x24 0xYY 0x01 0x1E 0x23, where YY is dimmer value
+  while (this->available()) {
+    memmove(&buf[0], &buf[1], 4);
+    this->read_byte(&buf[4]);
+
+    if (buf[0] == 0x24 && buf[2] == 0x01 && buf[3] == 0x1e && buf[4] == 0x23) {
+      float brightness = buf[1] / 100.0;
+      if (brightness > 1)
+        brightness = 1;
+
+      set_by_touch_ = true;
+      auto call = light_state_->make_call();
+      // Touch sensor only works when turned on
+      call.set_state(true);
+      call.set_brightness(brightness);
+      call.perform();
+
+      ESP_LOGD(TAG, "Dimmer value %d", buf[1]);
     }
+  }
+}
 
-    void GosundLight::loop() {
-      // pattern is 0x24 0xYY 0x01 0x1E 0x23, where YY is dimmer value
-      if (Serial.available() >= 5) {
-	char buff[5];
+void GosundSW2Output::dump_config() {
+  ESP_LOGCONFIG(TAG, "Gosund SW2");
+}
 
-	//
-	while (Serial.available() >= 5) {
-	  Serial.readBytes(buff, 5);
-	}
-	if (Serial.available() > 0) {
-	  ESP_LOGD(TAG, "Unexpected bytes on serial. ");
-	  ESP_LOGD(TAG, "  Expected: %02X %02X %02X %02X %02X",
-		   buff[0], buff[1], buff[2], buff[3], buff[4]);
-
-	  while (Serial.available() >= 1) {
-	    Serial.readBytes(buff, 1);
-	    ESP_LOGD(TAG, "  Unexpected: %02X", buff[0]);
-	  }
-	}
-
-	float dimmerVal = .01 * buff[1];
-
-	set_by_touch_ = true;    /* Prevent sending the value back to the hardware */
-	auto call = state_->make_call();
-	// Touch sensor only works when turned on
-	call.set_state(true);
-	call.set_brightness(dimmerVal);
-	call.perform();
-
-	ESP_LOGD(TAG, "Received dimmer value %02X %d", buff[1], buff[1]);
-      }
-    }
-
-    void GosundLight::dump_config() {
-    }
-
-    light::LightTraits GosundLight::get_traits() {
-      auto traits = light::LightTraits();
-      traits.set_supported_color_modes({light::ColorMode::BRIGHTNESS});
-      return traits;
-    }
-
-    void GosundLight::write_state(light::LightState *state) {
-      // don't go into an infinite loop when set by touch
-      if (set_by_touch_) {
-	set_by_touch_ = false;
-	return;
-      }
-
-      auto values = state->current_values;
-      uint8_t output = std::min(MAX_VALUE,
-				(uint8_t) (100 * values.get_brightness()));
-      output = std::max(MIN_VALUE, output);
-
-      if (values.get_state() > 0 && values.get_brightness() > 0) {
-	output += ON_MASK;
-	status_led_->turn_on();
-	ESP_LOGD(TAG, "turning on status LED");
-      } else {
-	status_led_->turn_off();
-	ESP_LOGD(TAG, "turning off status LED");
-      }
-
-      ESP_LOGD(TAG, "write_state() called with state: %0.1f, brightness: %.02f => output: %02X",
-	       values.get_state(), values.get_brightness(), output);
-
-      Serial.write(output);
-    }
-
-  } // namespace gosund
+} // namespace gosund
 } // namespace esphome

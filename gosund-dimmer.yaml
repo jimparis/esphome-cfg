@@ -4,15 +4,11 @@ substitutions:
 
 dashboard_import:
   package_import_url: github://jimparis/esphome-provisioning/gosund-dimmer.yaml@main
-  import_full_config: true
 
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
   name_add_mac_suffix: true
-#  includes:
-#    - gosund/gosund_sw2_light.hpp
-#    - gosund/gosund_sw2_light.cpp
   project:
     name: jim.gosund-dimmer
     version: "1.0"
@@ -50,12 +46,16 @@ external_components:
     refresh: 1s
 
 preferences:
-  flash_write_interval: 30s
+  flash_write_interval: 60s
 
 wifi:
   ap:
 
 captive_portal:
+
+switch:
+  - platform: restart
+    id: gosund_restart
 
 binary_sensor:
   - platform: gpio
@@ -66,15 +66,10 @@ binary_sensor:
     on_press:
       - light.toggle: gosund_light
     on_click:
-      min_length: 5s
-      max_length: 10s
+      min_length: 15s
+      max_length: 20s
       then:
         - switch.turn_on: gosund_restart
-
-switch:
-  - platform: restart
-    name: Reboot ${friendly_name}
-    id: gosund_restart
 
 uart:
   id: uart_bus
@@ -93,16 +88,13 @@ output:
     inverted: true
 
 light:
-  - platform: custom
-    lambda: |-
-      auto light_out = new gosund::GosundLight(id(white_led));
-      App.register_component(light_out);
-      return {light_out};
-    lights:
-      - name: ${friendly_name}
-        id: gosund_light
-        gamma_correct: 1.0
-        default_transition_length: 0s
+  - name: ${friendly_name}
+    platform: gosund
+    restore_mode: RESTORE_DEFAULT_OFF
+    id: gosund_light
+    status_led: white_led
+    default_transition_length: 0s
+
   - platform: binary
     id: gosund_wifi_status
     output: green_led

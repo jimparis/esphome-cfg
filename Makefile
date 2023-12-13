@@ -16,9 +16,16 @@ build-$1: venv
 	pipenv run esphome compile $1.yaml
 build:: build-$1
 flash-$1: venv
-	pipenv run esphome upload $1.yaml
+	pipenv run esphome run $1.yaml $(if $(TARGET),--device $(TARGET))
 endef
 $(foreach d,$(devices),$(eval $(call device_rules,$d)))
+
+.PHONY: ctrl
+ctrl:
+	git add -u
+	git commit --amend --no-edit
+	git push -f
+	pipenv run esphome compile gosund-dimmer.yaml
 
 .PHONY: venv
 venv: .venv/pyvenv.cfg
