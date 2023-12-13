@@ -1,17 +1,18 @@
 substitutions:
   name: gosund-dimmer
   friendly_name: Gosund Dimmer
-  name_add_mac_suffix: "true"
+
+dashboard_import:
+  package_import_url: github://jimparis/esphome-provisioning/gosund-dimmer.yaml@main
+  import_full_config: true
 
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
-  name_add_mac_suffix: ${name_add_mac_suffix}
-  platform: ESP8266
-  board: esp8285
-  includes:
-    - gosund/gosund_sw2_light.hpp
-    - gosund/gosund_sw2_light.cpp
+  name_add_mac_suffix: true
+#  includes:
+#    - gosund/gosund_sw2_light.hpp
+#    - gosund/gosund_sw2_light.cpp
   project:
     name: jim.gosund-dimmer
     version: "1.0"
@@ -30,6 +31,10 @@ esphome:
             - delay: 500ms
       - light.turn_off: gosund_wifi_status
 
+esp8266:
+  restore_from_flash: true
+  board: esp8285
+
 # Support logging, but not to UART (since it's used by dimmer)
 logger:
   baud_rate: 0
@@ -38,9 +43,14 @@ api:
 
 ota:
 
-dashboard_import:
-  package_import_url: github://jimparis/esphome-provisioning/gosund-dimmer.yaml@main
-  import_full_config: true
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-provisioning
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 30s
 
 wifi:
   ap:
