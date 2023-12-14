@@ -1,0 +1,150 @@
+substitutions:
+  name: gosund-switch
+  friendly_name: Gosund Switch
+
+dashboard_import:
+  package_import_url: github://jimparis/esphome-provisioning/gosund-switch.yaml@main
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: jim.gosund-switch
+    version: "1.0"
+
+  on_boot:
+    priority: 300
+    then:
+      - light.turn_on: gosund_wifi_status
+      - delay: 500ms
+      - while:
+          condition:
+            not:
+              wifi.connected
+          then:
+            - light.toggle: gosund_wifi_status
+            - delay: 500ms
+      - light.turn_off: gosund_wifi_status
+
+esp8266:
+  restore_from_flash: true
+  board: esp8285
+
+logger:
+
+api:
+
+ota:
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-provisioning
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 300s
+
+wifi:
+  ap:
+
+captive_portal:
+
+button:
+  - platform: restart
+    id: gosund_restart
+  - platform: factory_reset
+    id: gosund_factory_reset
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO0
+      mode: INPUT_PULLUP
+      inverted: true
+    id: main_button
+    on_press:
+      - switch.toggle: gosund_switch
+    on_multi_click:
+    # Hold for 10s-20s to reboot.  Green LED is on during this window.
+    - timing:
+        - ON for at least 10s
+      then:
+        - light.turn_on: gosund_wifi_status
+    - timing:
+        - ON for at least 20s
+      then:
+        - light.turn_off: gosund_wifi_status
+    - timing:
+        - ON for 10s to 20s
+      then:
+        - button.press: gosund_restart
+    # Hold for 60s-65s to factory reset.  Green LED is on during this window.
+    - timing:
+        - ON for at least 60s
+      then:
+        - light.turn_on: gosund_wifi_status
+    - timing:
+        - ON for at least 65s
+      then:
+        - light.turn_off: gosund_wifi_status
+    - timing:
+        - ON for 60s to 65s
+      then:
+        - button.press: gosund_factory_reset
+
+output:
+  - platform: esp8266_pwm
+    id: green_led
+    pin:
+      number: GPIO16
+      inverted: true
+  - platform: esp8266_pwm
+    id: red_led
+    pin:
+      number: GPIO02
+      inverted: true
+
+switch:
+  - platform: gpio
+    id: gosund_switch
+    pin: GPIO14
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - light.turn_on: gosund_relay_status
+    on_turn_off:
+      - light.turn_off: gosund_relay_status
+
+light:
+  - platform: monochromatic
+    id: gosund_wifi_status
+    output: green_led
+  - platform: monochromatic
+    id: gosund_relay_status
+    output: red_led
+
+# Expose ESPHome version and wifi connection info
+text_sensor:
+  - platform: version
+    name: ESPHome Version
+
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+    ssid:
+      name: SSID
+    bssid:
+      name: BSSID
+
+# Expose uptime and wifi signal strength
+sensor:
+  - platform: uptime
+    name: Uptime
+    filters:
+      - throttle: 300s
+  - platform: wifi_signal
+    name: WiFi Signal
+    filters:
+      - delta: 0.01
+      - throttle: 300s

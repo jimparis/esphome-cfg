@@ -6,13 +6,17 @@ all: help
 .PHONY: help
 help:
 	@echo "Makefile targets:"
-	@printf "  %-20s Build all\n" "build"
-	@$(foreach d,$(devices),printf "  %-20s Build $d.bin\n" "build-$d" ;)
-	@$(foreach d,$(devices),printf "  %-20s Build+flash $d\n" "flash-$d" ;)
+	@printf "  %-25s Build all\n" "build"
+	@$(foreach d,$(devices),printf "  %-25s Check config for $d\n" "config-$d" ;)
+	@$(foreach d,$(devices),printf "  %-25s Build $d.bin\n" "build-$d" ;)
+	@$(foreach d,$(devices),printf "  %-25s Build+flash $d\n" "flash-$d" ;)
 
 define device_rules
-.PHONY: build-$1
+.PHONY: config-$1
+config-$1: venv
+	pipenv run esphome config $1.yaml
 
+.PHONY: build-$1
 build-$1: $1.bin
 $1.bin: venv
 	pipenv run esphome compile $1.yaml
