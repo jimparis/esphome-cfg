@@ -108,6 +108,7 @@ output:
 
 switch:
   - platform: gpio
+    name: Relay
     id: gosund_switch
     pin: GPIO14
     restore_mode: RESTORE_DEFAULT_OFF
