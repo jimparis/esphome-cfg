@@ -98,12 +98,12 @@ output:
   - platform: esp8266_pwm
     id: green_led
     pin:
-      number: GPIO16
+      number: GPIO02
       inverted: true
   - platform: esp8266_pwm
     id: red_led
     pin:
-      number: GPIO02
+      number: GPIO16
       inverted: true
 
 switch:
@@ -120,9 +120,11 @@ light:
   - platform: monochromatic
     id: gosund_wifi_status
     output: green_led
+    default_transition_length: 50ms
   - platform: monochromatic
     id: gosund_relay_status
     output: red_led
+    default_transition_length: 50ms
 
 # Expose ESPHome version and wifi connection info
 text_sensor:
