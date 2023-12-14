@@ -118,6 +118,7 @@ light:
     id: gosund_light
     status_led: white_led
     default_transition_length: 0s
+    gamma_correct: 1.0
 
   - platform: binary
     id: gosund_wifi_status
