@@ -53,23 +53,47 @@ wifi:
 
 captive_portal:
 
-switch:
+button:
   - platform: restart
     id: gosund_restart
+  - platform: factory_reset
+    id: gosund_factory_reset
 
 binary_sensor:
   - platform: gpio
     pin:
       number: GPIO4
       inverted: true
-    id: button
+    id: main_button
     on_press:
       - light.toggle: gosund_light
-    on_click:
-      min_length: 15s
-      max_length: 20s
+    on_multi_click:
+    # Hold for 10s-20s to reboot.  Green LED is on during this window.
+    - timing:
+        - ON for at least 10s
       then:
-        - switch.turn_on: gosund_restart
+        - light.turn_on: gosund_wifi_status
+    - timing:
+        - ON for at least 20s
+      then:
+        - light.turn_off: gosund_wifi_status
+    - timing:
+        - ON for 10s to 20s
+      then:
+        - button.press: gosund_restart
+    # Hold for 60s-65s to factory reset.  Green LED is on during this window.
+    - timing:
+        - ON for at least 60s
+      then:
+        - light.turn_on: gosund_wifi_status
+    - timing:
+        - ON for at least 65s
+      then:
+        - light.turn_off: gosund_wifi_status
+    - timing:
+        - ON for 60s to 65s
+      then:
+        - button.press: gosund_factory_reset
 
 uart:
   id: uart_bus
