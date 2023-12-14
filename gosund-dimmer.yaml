@@ -76,6 +76,13 @@ uart:
   baud_rate: 115200
   tx_pin: GPIO1
   rx_pin: GPIO3
+  debug:
+    direction: BOTH
+    dummy_receiver: false
+    after:
+      delimiter: "\n"
+    sequence:
+      - lambda: UARTDebug::log_string(direction, bytes);
 
 output:
   - id: green_led
@@ -88,7 +95,7 @@ output:
     inverted: true
 
 light:
-  - name: ${friendly_name}
+  - name: Light
     platform: gosund
     restore_mode: RESTORE_DEFAULT_OFF
     id: gosund_light
@@ -103,24 +110,24 @@ light:
 # Expose ESPHome version and wifi connection info
 text_sensor:
   - platform: version
-    name: ${friendly_name} ESPHome Version
+    name: ESPHome Version
 
   - platform: wifi_info
     ip_address:
-      name: ${friendly_name} IP Address
+      name: IP Address
     ssid:
-      name: ${friendly_name} SSID
+      name: SSID
     bssid:
-      name: ${friendly_name} BSSID
+      name: BSSID
 
 # Expose uptime and wifi signal strength
 sensor:
   - platform: uptime
-    name: ${friendly_name} Uptime
+    name: Uptime
     filters:
       - throttle: 300s
   - platform: wifi_signal
-    name: ${friendly_name} WiFi Signal
+    name: WiFi Signal
     filters:
       - delta: 0.01
       - throttle: 300s

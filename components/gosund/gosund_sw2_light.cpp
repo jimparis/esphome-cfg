@@ -35,10 +35,10 @@ void GosundSW2Output::write_state(light::LightState *state) {
     status_led_->turn_off();
   }
 
+  this->write_byte(output);
+
   ESP_LOGD(TAG, "write_state() called with state: %0.1f, brightness: %.02f => output: %02X",
            values.get_state(), values.get_brightness(), output);
-
-  this->write_byte(output);
 }
 
 void GosundSW2Output::loop() {
