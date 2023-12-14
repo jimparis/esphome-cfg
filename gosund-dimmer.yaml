@@ -46,7 +46,7 @@ external_components:
     refresh: 1s
 
 preferences:
-  flash_write_interval: 60s
+  flash_write_interval: 300s
 
 wifi:
   ap:
@@ -76,13 +76,6 @@ uart:
   baud_rate: 115200
   tx_pin: GPIO1
   rx_pin: GPIO3
-  debug:
-    direction: BOTH
-    dummy_receiver: false
-    after:
-      delimiter: "\n"
-    sequence:
-      - lambda: UARTDebug::log_string(direction, bytes);
 
 output:
   - id: green_led
