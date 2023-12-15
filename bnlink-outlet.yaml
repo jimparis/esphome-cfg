@@ -2,9 +2,9 @@
 substitutions:
   name: bnlink-outlet
   friendly_name: BN-Link Outlet
-  voltage_divider: "2351"
-  current_resistor: "0.001"
-  current_multiply: "1.0"
+  voltage_divider: "798.9"
+  current_resistor: "0.003513"
+  current_multiply: "2.0"
 
 dashboard_import:
   package_import_url: github://jimparis/esphome-provisioning/bnlink-outlet.yaml@main
@@ -157,7 +157,7 @@ sensor:
       id: "sensed_power"
       name: "Outlet Power"
       unit_of_measurement: W
-    update_interval: 10s
+    update_interval: 60s
 
   - platform: total_daily_energy
     name: "Outlet Total Daily Energy"
