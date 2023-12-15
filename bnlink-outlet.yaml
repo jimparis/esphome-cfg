@@ -72,7 +72,7 @@ binary_sensor:
       number: GPIO3
       inverted: true
     id: main_button
-    name: Button
+    name: ${name} Button
     on_press:
       - switch.toggle: relay_switch
     on_multi_click:
@@ -107,17 +107,17 @@ output:
   - platform: esp8266_pwm
     id: blue_led
     pin:
-      number: GPIO13
+      number: GPIO1
       inverted: true
   - platform: esp8266_pwm
     id: red_led
     pin:
-      number: GPIO1
+      number: GPIO13
       inverted: true
 
 switch:
   - platform: gpio
-    name: Relay
+    name: ${name} Relay
     id: relay_switch
     pin: GPIO14
     restore_mode: RESTORE_DEFAULT_OFF
@@ -146,21 +146,33 @@ sensor:
     current_resistor: ${current_resistor}
     voltage_divider: ${voltage_divider}
     current:
-      name: "Outlet Current"
+      name: "${name} Current"
       unit_of_measurement: A
       filters:
         - multiply: ${current_multiply}
+        - or:
+            - throttle: 60s
+            - delta: 0.5
     voltage:
-      name: "Outlet Voltage"
+      name: "${name} Voltage"
       unit_of_measurement: V
+      filters:
+        - or:
+            - throttle: 300s
+            - delta: 5.0
     power:
       id: "sensed_power"
-      name: "Outlet Power"
+      name: "${name} Power"
       unit_of_measurement: W
-    update_interval: 60s
+      filters:
+        - or:
+            - throttle: 60s
+            - delta: 25.0
+    change_mode_every: 6
+    update_interval: 3s
 
   - platform: total_daily_energy
-    name: "Outlet Total Daily Energy"
+    name: "${name} Total Daily Energy"
     power_id: "sensed_power"
     filters:
         - multiply: 0.001 # W to kW
@@ -168,11 +180,11 @@ sensor:
 
   # Expose uptime and wifi signal strength
   - platform: uptime
-    name: Uptime
+    name: "${name} Uptime"
     filters:
       - throttle: 300s
   - platform: wifi_signal
-    name: WiFi Signal
+    name: "${name} WiFi Signal"
     filters:
       - delta: 0.01
       - throttle: 300s
@@ -180,12 +192,12 @@ sensor:
 # Expose ESPHome version and wifi connection info
 text_sensor:
   - platform: version
-    name: ESPHome Version
+    name: "${name} ESPHome Version"
 
   - platform: wifi_info
     ip_address:
-      name: IP Address
+      name: "${name} IP Address"
     ssid:
-      name: SSID
+      name: "${name} SSID"
     bssid:
-      name: BSSID
+      name: "${name} BSSID"
