@@ -1,0 +1,191 @@
+# BN-LINK BNC-60/U133TJ power monitoring outlet switch
+substitutions:
+  name: bnlink-outlet
+  friendly_name: BN-Link Outlet
+  voltage_divider: "2351"
+  current_resistor: "0.001"
+  current_multiply: "1.0"
+
+dashboard_import:
+  package_import_url: github://jimparis/esphome-provisioning/bnlink-outlet.yaml@main
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: jim.bnlink-outlet
+    version: "1.0"
+
+  on_boot:
+    priority: 300
+    then:
+      - light.turn_on: wifi_status
+      - delay: 500ms
+      - while:
+          condition:
+            not:
+              wifi.connected
+          then:
+            - light.toggle: wifi_status
+            - delay: 500ms
+      - light.turn_off: wifi_status
+
+esp8266:
+  restore_from_flash: true
+  board: esp01_1m
+
+logger:
+  baud_rate: 0 # No UART connected
+
+ota:
+
+api:
+
+time:
+  - platform: homeassistant
+    id: homeassistant_time
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-provisioning
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 300s
+
+wifi:
+  ap:
+
+captive_portal:
+
+button:
+  - platform: restart
+    id: esphome_restart
+  - platform: factory_reset
+    id: esphome_factory_reset
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: GPIO3
+      inverted: true
+    id: main_button
+    name: Button
+    on_press:
+      - switch.toggle: relay_switch
+    on_multi_click:
+    # Hold for 10s-20s to reboot.  Status LED is on during this window.
+    - timing:
+        - ON for at least 10s
+      then:
+        - light.turn_on: wifi_status
+    - timing:
+        - ON for at least 20s
+      then:
+        - light.turn_off: wifi_status
+    - timing:
+        - ON for 10s to 20s
+      then:
+        - button.press: esphome_restart
+    # Hold for 60s-65s to factory reset.  Status LED is on during this window.
+    - timing:
+        - ON for at least 60s
+      then:
+        - light.turn_on: wifi_status
+    - timing:
+        - ON for at least 65s
+      then:
+        - light.turn_off: wifi_status
+    - timing:
+        - ON for 60s to 65s
+      then:
+        - button.press: esphome_factory_reset
+
+output:
+  - platform: esp8266_pwm
+    id: blue_led
+    pin:
+      number: GPIO13
+      inverted: true
+  - platform: esp8266_pwm
+    id: red_led
+    pin:
+      number: GPIO1
+      inverted: true
+
+switch:
+  - platform: gpio
+    name: Relay
+    id: relay_switch
+    pin: GPIO14
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - light.turn_on: relay_status
+    on_turn_off:
+      - light.turn_off: relay_status
+
+light:
+  - platform: monochromatic
+    id: wifi_status
+    output: red_led
+    default_transition_length: 50ms
+  - platform: monochromatic
+    id: relay_status
+    output: blue_led
+    default_transition_length: 50ms
+
+sensor:
+  - platform: hlw8012
+    sel_pin:
+      number: GPIO12
+      inverted: True
+    cf_pin: GPIO4
+    cf1_pin: GPIO5
+    current_resistor: ${current_resistor}
+    voltage_divider: ${voltage_divider}
+    current:
+      name: "Outlet Current"
+      unit_of_measurement: A
+      filters:
+        - multiply: ${current_multiply}
+    voltage:
+      name: "Outlet Voltage"
+      unit_of_measurement: V
+    power:
+      id: "sensed_power"
+      name: "Outlet Power"
+      unit_of_measurement: W
+    update_interval: 10s
+
+  - platform: total_daily_energy
+    name: "Outlet Total Daily Energy"
+    power_id: "sensed_power"
+    filters:
+        - multiply: 0.001 # W to kW
+    unit_of_measurement: kWh
+
+  # Expose uptime and wifi signal strength
+  - platform: uptime
+    name: Uptime
+    filters:
+      - throttle: 300s
+  - platform: wifi_signal
+    name: WiFi Signal
+    filters:
+      - delta: 0.01
+      - throttle: 300s
+
+# Expose ESPHome version and wifi connection info
+text_sensor:
+  - platform: version
+    name: ESPHome Version
+
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+    ssid:
+      name: SSID
+    bssid:
+      name: BSSID
