@@ -1,0 +1,24 @@
+# Expose ESPHome version and wifi connection info
+text_sensor:
+  - platform: version
+    name: ESPHome Version
+
+  - platform: wifi_info
+    ip_address:
+      name: IP Address
+    ssid:
+      name: SSID
+    bssid:
+      name: BSSID
+
+# Expose uptime and wifi signal strength
+sensor:
+  - platform: uptime
+    name: Uptime
+    filters:
+      - throttle: 300s
+  - platform: wifi_signal
+    name: WiFi Signal
+    filters:
+      - delta: 0.01
+      - throttle: 300s

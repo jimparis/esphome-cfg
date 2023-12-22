@@ -6,6 +6,9 @@ substitutions:
   current_resistor: "0.003513"
   current_multiply: "2.0"
 
+packages:
+  deviceinfo: !include common/deviceinfo.yaml
+
 dashboard_import:
   package_import_url: github://jimparis/esphome-provisioning/bnlink-outlet.yaml@main
 
@@ -177,27 +180,3 @@ sensor:
     filters:
         - multiply: 0.001 # W to kW
     unit_of_measurement: kWh
-
-  # Expose uptime and wifi signal strength
-  - platform: uptime
-    name: "${name} Uptime"
-    filters:
-      - throttle: 300s
-  - platform: wifi_signal
-    name: "${name} WiFi Signal"
-    filters:
-      - delta: 0.01
-      - throttle: 300s
-
-# Expose ESPHome version and wifi connection info
-text_sensor:
-  - platform: version
-    name: "${name} ESPHome Version"
-
-  - platform: wifi_info
-    ip_address:
-      name: "${name} IP Address"
-    ssid:
-      name: "${name} SSID"
-    bssid:
-      name: "${name} BSSID"
