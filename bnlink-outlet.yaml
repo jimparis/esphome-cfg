@@ -8,6 +8,7 @@ substitutions:
 
 packages:
   deviceinfo: !include common/deviceinfo.yaml
+  factoryreset: !include common/factoryreset.yaml
 
 dashboard_import:
   package_import_url: github://jimparis/esphome-provisioning/bnlink-outlet.yaml@main
@@ -63,48 +64,14 @@ wifi:
 
 captive_portal:
 
-button:
-  - platform: restart
-    id: esphome_restart
-  - platform: factory_reset
-    id: esphome_factory_reset
-
 binary_sensor:
-  - platform: gpio
-    pin:
+  - pin:
       number: GPIO3
       inverted: true
-    id: main_button
+    id: !extend main_button
     name: ${name} Button
     on_press:
       - switch.toggle: relay_switch
-    on_multi_click:
-    # Hold for 10s-20s to reboot.  Status LED is on during this window.
-    - timing:
-        - ON for at least 10s
-      then:
-        - light.turn_on: wifi_status
-    - timing:
-        - ON for at least 20s
-      then:
-        - light.turn_off: wifi_status
-    - timing:
-        - ON for 10s to 20s
-      then:
-        - button.press: esphome_restart
-    # Hold for 60s-65s to factory reset.  Status LED is on during this window.
-    - timing:
-        - ON for at least 60s
-      then:
-        - light.turn_on: wifi_status
-    - timing:
-        - ON for at least 65s
-      then:
-        - light.turn_off: wifi_status
-    - timing:
-        - ON for 60s to 65s
-      then:
-        - button.press: esphome_factory_reset
 
 output:
   - platform: esp8266_pwm

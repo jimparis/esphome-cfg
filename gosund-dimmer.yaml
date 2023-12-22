@@ -4,6 +4,7 @@ substitutions:
 
 packages:
   deviceinfo: !include common/deviceinfo.yaml
+  factoryreset: !include common/factoryreset.yaml
 
 dashboard_import:
   package_import_url: github://jimparis/esphome-provisioning/gosund-dimmer.yaml@main
@@ -19,16 +20,16 @@ esphome:
   on_boot:
     priority: 300
     then:
-      - light.turn_on: gosund_wifi_status
+      - light.turn_on: wifi_status
       - delay: 500ms
       - while:
           condition:
             not:
               wifi.connected
           then:
-            - light.toggle: gosund_wifi_status
+            - light.toggle: wifi_status
             - delay: 500ms
-      - light.turn_off: gosund_wifi_status
+      - light.turn_off: wifi_status
 
 esp8266:
   restore_from_flash: true
@@ -67,36 +68,9 @@ binary_sensor:
     pin:
       number: GPIO4
       inverted: true
-    id: main_button
+    id: !extend main_button
     on_press:
       - light.toggle: gosund_light
-    on_multi_click:
-    # Hold for 10s-20s to reboot.  Green LED is on during this window.
-    - timing:
-        - ON for at least 10s
-      then:
-        - light.turn_on: gosund_wifi_status
-    - timing:
-        - ON for at least 20s
-      then:
-        - light.turn_off: gosund_wifi_status
-    - timing:
-        - ON for 10s to 20s
-      then:
-        - button.press: gosund_restart
-    # Hold for 60s-65s to factory reset.  Green LED is on during this window.
-    - timing:
-        - ON for at least 60s
-      then:
-        - light.turn_on: gosund_wifi_status
-    - timing:
-        - ON for at least 65s
-      then:
-        - light.turn_off: gosund_wifi_status
-    - timing:
-        - ON for 60s to 65s
-      then:
-        - button.press: gosund_factory_reset
 
 uart:
   id: uart_bus
@@ -124,6 +98,6 @@ light:
     gamma_correct: 1.0
 
   - platform: binary
-    id: gosund_wifi_status
+    id: wifi_status
     output: green_led
     restore_mode: ALWAYS_ON
