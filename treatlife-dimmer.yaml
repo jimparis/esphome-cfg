@@ -1,0 +1,51 @@
+substitutions:
+  name: treatlife-dimmer
+  friendly_name: Treatlife 3-Way Dimmer
+
+packages:
+  deviceinfo: !include common/deviceinfo.yaml
+
+dashboard_import:
+  package_import_url: github://jimparis/esphome-provisioning/treatlife-dimmer.yaml@main
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: jim.treatlife-dimmer
+    version: "1.0"
+
+esp8266:
+  restore_from_flash: true
+  board: esp12e
+
+# Support logging, but not to UART (since it's used by dimmer)
+logger:
+  baud_rate: 0
+
+api:
+
+ota:
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-provisioning
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 300s
+
+wifi:
+  ap:
+
+captive_portal:
+
+uart:
+  id: uart_bus
+  baud_rate: 9600
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+
+tuya:
