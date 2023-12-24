@@ -10,6 +10,7 @@ help:
 	@$(foreach d,$(devices),printf "  %-25s Check config for $d\n" "config-$d" ;)
 	@$(foreach d,$(devices),printf "  %-25s Build $d.bin\n" "build-$d" ;)
 	@$(foreach d,$(devices),printf "  %-25s Build+flash $d\n" "flash-$d" ;)
+	@printf "For flashing, set TARGET=hostname.home or TARGET=/dev/ttyUSB0\n"
 
 define device_rules
 .PHONY: config-$1
