@@ -27,6 +27,7 @@ logger:
 api:
 
 ota:
+  - platform: esphome
 
 external_components:
   - source:

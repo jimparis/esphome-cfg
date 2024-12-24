@@ -43,6 +43,7 @@ logger:
   baud_rate: 0 # No UART connected
 
 ota:
+  - platform: esphome
 
 api:
 
