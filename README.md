@@ -30,3 +30,38 @@ fresh provisioned state, erase first:
 - Connect to the AP created by the device
 - Visit 192.168.4.1 and configure WiFi credentials
 - Visit ESPHome and adopt the device
+
+
+## ELEGRP DPR10 Dimmer Switch
+
+This has a BK7231N module (not ESP32 or ESP8266), but there's support
+in ESPHome for it through LibreTiny.
+
+Unfortunately the firmware it was delivered with is too new to be
+reflashed OTA with either tuya-convert or tuya-cloudcutter, so it
+needs to be opened and flashed via serial.
+
+### Hardware connections
+
+Remove screws on the back.
+
+Connect a Micro1v8 or MicroFTX configured for 3.3V as follows:
+
+    Micro1v8    DPR10
+    GND         GND (G hole near Tuya MCU)
+    OUT         TX (TX test point near Tuya MCU)
+    IN          RX (RX test point near Tuya MCU)
+    V           Tap onto 3.3V rail that goes into Wifi module
+
+### Firmware
+
+Get [kickstart-bk7231n-2025-05-28.uf2](https://github.com/libretiny-eu/esphome-kickstart/releases/download/v25.05.28/kickstart-bk7231n-2025-05-28.uf2)
+from https://github.com/libretiny-eu/esphome-kickstart/releases/tag/v25.05.28
+
+Flash with
+
+    uv run --with ltchiptool,wxpython,zeroconf ltchiptool flash write -d /dev/serial/by-id/... kickstart-bk7231n-2025-05-28.uf2
+
+Right after running that command, briefly touch GND to the exposed CEN finger on the Wifi module
+
+After flashing, you should see a "kickstart-xxxx" WiFI appear.
