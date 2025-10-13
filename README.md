@@ -47,6 +47,8 @@ Remove screws on the back.
 
 Connect a Micro1v8 or MicroFTX configured for 3.3V as follows:
 
+![](images/elegrp-dpr10-pinout.jpg)
+
     Micro1v8    DPR10
     GND         GND (G hole near Tuya MCU)
     OUT         TX (TX test point near Tuya MCU)
@@ -64,4 +66,4 @@ Flash with
 
 Right after running that command, briefly touch GND to the exposed CEN finger on the Wifi module
 
-After flashing, you should see a "kickstart-xxxx" WiFI appear.
+After flashing, you should see a "kickstart-bk7231n" WiFI appear.
