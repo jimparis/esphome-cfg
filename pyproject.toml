@@ -1,0 +1,12 @@
+[project]
+name = "esphome-provisioning"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "esphome>=2025.9.3",
+    "esptool>=5.0.2",
+    "ltchiptool>=4.12.2",
+    "zeroconf>=0.147.2",
+]

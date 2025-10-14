@@ -14,12 +14,12 @@ help:
 
 define device_rules
 .PHONY: config-$1
-config-$1: venv
-	pipenv run esphome config $1.yaml
+config-$1:
+	uv run esphome config $1.yaml
 
 .PHONY: build-$1
 build-$1: $1.bin
-$1.bin: venv
+$1.bin:
 	pipenv run esphome compile $1.yaml
 	cp -vf .esphome/build/$1/.pioenvs/$1/firmware.bin $1.bin
 build:: build-$1
@@ -27,7 +27,7 @@ clean::
 	rm -f $1.bin
 
 .PHONY: flash-$1
-flash-$1: venv
+flash-$1:
 	pipenv run esphome run $1.yaml $(if $(TARGET),--device $(TARGET))
 endef
 $(foreach d,$(devices),$(eval $(call device_rules,$d)))
@@ -41,14 +41,6 @@ ctrl:
 	git commit --amend --no-edit
 	git push -f
 	pipenv run esphome compile gosund-dimmer.yaml
-
-.PHONY: venv
-venv: .venv/pyvenv.cfg
-
-.venv/pyvenv.cfg:
-	mkdir -p .venv
-	pipenv install
-	[ -e $@ ] || ( rm -rf .venv ; echo Failed to make pyvenv.cfg ; false )
 
 #flash:
 #	pipenv run esptool.py --chip esp8266 -p /dev/ttyUSB0 write_flash 0x0 gosund-dimmer.bin
