@@ -1,0 +1,165 @@
+substitutions:
+  name: elegrp-dimmer-dpr10
+  friendly_name: ELEGRP Dimmer
+
+packages:
+  deviceinfo: !include common/deviceinfo.yaml
+
+dashboard_import:
+  package_import_url: github://jimparis/esphome-provisioning/elegrp-dimmer-dpr10.yaml@main
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: jim.elegrp-dimmer-dpr10
+    version: "1.0"
+
+  # https://github.com/libretiny-eu/libretiny/issues/316
+  platformio_options:
+    build_flags:
+      - -DLWIP_DHCP_DOES_ACD_CHECK=0
+
+bk72xx:
+  board: cb2s
+
+# Support logging, but not to UART (since it's used by dimmer)
+logger:
+  baud_rate: 0
+
+api:
+
+ota:
+  - platform: esphome
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-provisioning
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 300s
+
+wifi:
+  ap:
+
+captive_portal:
+
+uart:
+  tx_pin: TX1
+  rx_pin: RX1
+  baud_rate: 9600
+
+button:
+  - platform: restart
+    name: "Device Restart"
+    id: esphome_restart
+
+tuya:
+  id: id_tuya_device
+
+switch:
+  - platform: tuya
+    switch_datapoint: 114
+    name: "Enable Set Brightness Min"
+    id: id_switch_set_brightness_min
+    entity_category: config
+
+number:
+  # Allows for setting brightness value without turning the light ON
+  - platform: tuya
+    number_datapoint: 2
+    name: "Dimmer Brightness control"
+    id: dimmer_brightness_control
+    min_value: 1
+    max_value: 100
+    step: 1
+    # TuyaMCU scale is 10 to 1000
+    multiply: 10
+  - platform: tuya
+    number_datapoint: 108
+    name: "Longpress Brightness"
+    id: id_number_longpress_brightness
+    min_value: 10
+    max_value: 1000
+    step: 1
+    entity_category: config
+  - platform: tuya
+    number_datapoint: 101
+    name: "Indicator Brightness"
+    id: indicator_brightness
+    min_value: 0
+    max_value: 100
+    step: 1
+    entity_category: config
+  - platform: tuya
+    number_datapoint: 5
+    name: "Brightness Max"
+    id: id_number_brightness_max
+    min_value: 550
+    max_value: 1000
+    step: 1
+    entity_category: config
+  # User must activate "Enable Set Brightness Min" switch before changing the value of this
+  - platform: tuya
+    number_datapoint: 3
+    name: "Brightness Min"
+    id: id_number_brightness_min
+    min_value: 0
+    max_value: 500
+    step: 1
+    entity_category: config
+
+select:
+  - platform: tuya
+    enum_datapoint: 103
+    name: "Fade On Speed"
+    id: id_select_fade_on_speed
+    optimistic: true
+    options:
+      0: "Immediate"
+      1: "Fast"   # 1s
+      2: "Medium" # 5s
+      3: "Slow"   # 15s
+    entity_category: config
+  - platform: tuya
+    enum_datapoint: 104
+    name: "Fade Off Speed"
+    id: id_select_fade_off_speed
+    optimistic: true
+    options:
+      0: "Immediate"
+      1: "Fast"   # 1s
+      2: "Medium" # 5s
+      3: "Slow"   # 15s
+    entity_category: config
+  - platform: tuya
+    enum_datapoint: 4
+    name: "Bulb Type"
+    id: id_select_bulb_type
+    optimistic: true
+    options:
+      0: "CFL"
+      1: "Incandescent"
+      2: "Halogen"
+      3: "LED"
+    entity_category: config
+
+light:
+  - platform: tuya
+    name: "Dimmer"
+    id: dimmer
+    dimmer_datapoint: 2
+    min_value_datapoint: 2
+    max_value: 1000
+    switch_datapoint: 1
+
+interval:
+  # Workaround for rare occasions whenre indicator brightness is not being taken in by TuyaMCU
+  - interval: 1min
+    startup_delay: 1min
+    then:
+      - lambda: |-
+          id(id_tuya_device).force_set_integer_datapoint_value(101, id(indicator_brightness).state);

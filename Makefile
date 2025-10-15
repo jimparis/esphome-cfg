@@ -6,10 +6,10 @@ all: help
 .PHONY: help
 help:
 	@echo "Makefile targets:"
-	@printf "  %-25s Build all\n" "build"
-	@$(foreach d,$(devices),printf "  %-25s Check config for $d\n" "config-$d" ;)
-	@$(foreach d,$(devices),printf "  %-25s Build $d.bin\n" "build-$d" ;)
-	@$(foreach d,$(devices),printf "  %-25s Build+flash $d\n" "flash-$d" ;)
+	@printf "  %-30s Build all\n" "build"
+	@$(foreach d,$(devices),printf "  %-30s Check config for $d\n" "config-$d" ;)
+	@$(foreach d,$(devices),printf "  %-30s Build $d.bin\n" "build-$d" ;)
+	@$(foreach d,$(devices),printf "  %-30s Build+flash $d\n" "flash-$d" ;)
 	@printf "For flashing, set TARGET=hostname.home or TARGET=/dev/ttyUSB0\n"
 
 define device_rules
@@ -20,7 +20,7 @@ config-$1:
 .PHONY: build-$1
 build-$1: $1.bin
 $1.bin:
-	pipenv run esphome compile $1.yaml
+	uv run esphome compile $1.yaml
 	cp -vf .esphome/build/$1/.pioenvs/$1/firmware.bin $1.bin
 build:: build-$1
 clean::
@@ -28,7 +28,7 @@ clean::
 
 .PHONY: flash-$1
 flash-$1:
-	pipenv run esphome run $1.yaml $(if $(TARGET),--device $(TARGET))
+	uv run esphome run $1.yaml $(if $(TARGET),--device $(TARGET))
 endef
 $(foreach d,$(devices),$(eval $(call device_rules,$d)))
 
@@ -40,7 +40,7 @@ ctrl:
 	git add -u
 	git commit --amend --no-edit
 	git push -f
-	pipenv run esphome compile gosund-dimmer.yaml
+	uv run esphome compile elegrp-dimmer-dpr10.yaml
 
 #flash:
 #	pipenv run esptool.py --chip esp8266 -p /dev/ttyUSB0 write_flash 0x0 gosund-dimmer.bin
