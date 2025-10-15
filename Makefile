@@ -19,7 +19,7 @@ config-$1:
 
 .PHONY: build-$1
 build-$1: $1.bin
-$1.bin:
+$1.bin: $1.yaml
 	uv run esphome compile $1.yaml
 	cp -vf .esphome/build/$1/.pioenvs/$1/firmware.bin $1.bin
 build:: build-$1

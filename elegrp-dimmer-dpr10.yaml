@@ -24,6 +24,10 @@ esphome:
 bk72xx:
   board: cb2s
 
+factory_reset:
+  resets_required: 10
+  max_delay: 10s
+
 # Support logging, but not to UART (since it's used by dimmer)
 logger:
   baud_rate: 0
@@ -56,6 +60,9 @@ button:
   - platform: restart
     name: "Device Restart"
     id: esphome_restart
+  - platform: factory_reset
+    name: "Device Factory Reset"
+    id: esphome_factory_reset
 
 tuya:
   id: id_tuya_device

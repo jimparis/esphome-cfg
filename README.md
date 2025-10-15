@@ -57,6 +57,8 @@ Connect a Micro1v8 or MicroFTX configured for 3.3V as follows:
 
 ### Firmware
 
+#### Kickstart
+
 Get [kickstart-bk7231n-2025-05-28.uf2](https://github.com/libretiny-eu/esphome-kickstart/releases/download/v25.05.28/kickstart-bk7231n-2025-05-28.uf2)
 from https://github.com/libretiny-eu/esphome-kickstart/releases/tag/v25.05.28
 
@@ -67,3 +69,12 @@ Flash with
 Right after running that command, briefly touch GND to the exposed CEN finger on the Wifi module
 
 After flashing, you should see a "kickstart-bk7231n" WiFI appear.
+Connect, and configure it to connect to BACONHOME
+
+#### OTA FW
+
+Flash via esphome (through esphome OTA API) with e.g.:
+
+    make flash-elegrp-dimmer-dpr10 TARGET=kickstart-bk7231n.home
+    make flash-elegrp-dimmer-dpr10 TARGET=elegrp-dimmer-dpr10-128b7d.home
+    make flash-elegrp-dimmer-dpr10 TARGET=elegrp-dimmer-dpr10-128b7d.bacon
