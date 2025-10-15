@@ -5,7 +5,14 @@ components for custom ESPHome hardware.  When flashed on to a device,
 they can be given WiFi credentials through a captive portal, and
 adopted into ESPHome dashboard automatically.
 
-## Usage examples
+## Using a device once it's flashed or factory-reset
+
+- Power on device
+- Connect to the AP created by the device
+- Visit 192.168.4.1 and configure WiFi credentials
+- Visit ESPHome and adopt the device
+
+## ESP based modules
 
 ### Build .bin for flashing via existing Tasmota:
 
@@ -23,14 +30,6 @@ fresh provisioned state, erase first:
 ### Flash via OTA over existing esphome firmware
 
     make flash-gosund-dimmer TARGET=gosund-dimmer-aabbcc.local
-
-## Using a device once it's flashed
-
-- Power on device
-- Connect to the AP created by the device
-- Visit 192.168.4.1 and configure WiFi credentials
-- Visit ESPHome and adopt the device
-
 
 ## ELEGRP DPR10 Dimmer Switch
 
