@@ -77,3 +77,16 @@ Flash via esphome (through esphome OTA API) with e.g.:
     make flash-elegrp-dimmer-dpr10 TARGET=kickstart-bk7231n.home
     make flash-elegrp-dimmer-dpr10 TARGET=elegrp-dimmer-dpr10-128b7d.home
     make flash-elegrp-dimmer-dpr10 TARGET=elegrp-dimmer-dpr10-128b7d.bacon
+
+#### Debug notes
+
+After build, unencrypted binary is
+
+    .esphome/build/elegrp-dimmer-dpr10/.pioenvs/elegrp-dimmer-dpr10/raw_firmware.bin
+
+See what devices are advertising with
+
+    avahi-browse -r _esphomelib._tcp
+
+Look for `package_import_url` in the `txt` record to make sure
+adoption in esphome UI will work.
