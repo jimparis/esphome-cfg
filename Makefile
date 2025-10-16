@@ -40,7 +40,7 @@ ctrl:
 	git add -u
 	git commit --amend --no-edit
 	git push -f
-	uv run esphome compile elegrp-dimmer-dpr10.yaml
+	uv run esphome compile elegrp-dpr10.yaml
 
 #flash:
 #	pipenv run esptool.py --chip esp8266 -p /dev/ttyUSB0 write_flash 0x0 gosund-dimmer.bin

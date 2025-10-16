@@ -1,19 +1,19 @@
 substitutions:
-  name: elegrp-dimmer-dpr10
+  name: elegrp-dpr10
   friendly_name: ELEGRP Dimmer
 
 packages:
   deviceinfo: !include common/deviceinfo.yaml
 
 dashboard_import:
-  package_import_url: github://jimparis/esphome-provisioning/elegrp-dimmer-dpr10.yaml@main
+  package_import_url: github://jimparis/esphome-provisioning/elegrp-dpr10.yaml@main
 
 esphome:
   name: "${name}"
   friendly_name: "${friendly_name}"
   name_add_mac_suffix: true
   project:
-    name: jim.elegrp-dimmer-dpr10
+    name: jim.elegrp-dpr10
     version: "1.0"
 
   # https://github.com/libretiny-eu/libretiny/issues/316
