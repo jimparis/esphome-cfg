@@ -21,7 +21,7 @@ config-$1:
 build-$1: $1.bin
 $1.bin: $1.yaml
 	uv run esphome compile $1.yaml
-	cp -vf .esphome/build/$1/.pioenvs/$1/firmware.bin $1.bin
+	name=$$$$(awk '/name:/ { print $$$$2 ; exit }' $1.yaml) ; cp -vf .esphome/build/$$$$name/.pioenvs/$$$$name/firmware.bin $1.bin
 build:: build-$1
 clean::
 	rm -f $1.bin
@@ -40,7 +40,7 @@ ctrl:
 	git add -u
 	git commit --amend --no-edit
 	git push -f
-	uv run esphome compile elegrp-dpr10.yaml
+	uv run esphome compile elegrp.yaml
 
 #flash:
 #	pipenv run esptool.py --chip esp8266 -p /dev/ttyUSB0 write_flash 0x0 gosund-dimmer.bin

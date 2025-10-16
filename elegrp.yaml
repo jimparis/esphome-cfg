@@ -65,6 +65,7 @@ button:
   - platform: factory_reset
     name: "Device Factory Reset"
     id: esphome_factory_reset
+    disabled_by_default: true
 
 tuya:
   id: id_tuya_device
