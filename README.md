@@ -74,19 +74,20 @@ Connect, and configure it to connect to BACONHOME
 
 Flash via esphome (through esphome OTA API) with e.g.:
 
-    make flash-elegrp-dpr10 TARGET=kickstart-bk7231n.home
-    make flash-elegrp-dpr10 TARGET=elegrp-dpr10-128b7d.home
-    make flash-elegrp-dpr10 TARGET=elegrp-dpr10-128b7d.bacon
+    make flash-elegrp TARGET=kickstart-bk7231n.home
+    make flash-elegrp TARGET=elegrp-dpr10-128b7d.home
+    make flash-elegrp TARGET=elegrp-dpr10-128b7d.bacon
 
 #### Debug notes
 
 After build, unencrypted binary is
 
-    .esphome/build/elegrp-dpr10/.pioenvs/elegrp-dpr10/raw_firmware.bin
+    .esphome/build/elegrp/.pioenvs/elegrp-dpr10/raw_firmware.bin
 
 See what devices are advertising with
 
     avahi-browse -r _esphomelib._tcp
 
 Look for `package_import_url` in the `txt` record to make sure
-adoption in esphome UI will work.
+adoption in esphome UI will work.  URL must be 44 chars or less
+on bk7231n platform.

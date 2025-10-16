@@ -11,7 +11,7 @@ packages:
   factoryreset: !include common/factoryreset.yaml
 
 dashboard_import:
-  package_import_url: github://jimparis/esphome-provisioning/bnlink-outlet.yaml@main
+  package_import_url: github://jimparis/esphome-cfg/bnlink-outlet.yaml@main
 
 esphome:
   name: "${name}"
@@ -54,7 +54,7 @@ time:
 external_components:
   - source:
       type: git
-      url: https://github.com/jimparis/esphome-provisioning
+      url: https://github.com/jimparis/esphome-cfg
     refresh: 1s
 
 preferences:

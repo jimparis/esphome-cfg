@@ -6,7 +6,9 @@ packages:
   deviceinfo: !include common/deviceinfo.yaml
 
 dashboard_import:
-  package_import_url: github://jimparis/esphome-provisioning/elegrp-dpr10.yaml@main
+  # Limited to 44 chars, see https://github.com/esphome/esphome/issues/11281
+  #                   12345678901234567890123456789012345678901234
+  package_import_url: github://jimparis/esphome-cfg/elegrp.yaml
 
 esphome:
   name: "${name}"
@@ -31,6 +33,7 @@ factory_reset:
 # Support logging, but not to UART (since it's used by dimmer)
 logger:
   baud_rate: 0
+  level: VERBOSE
 
 api:
 
@@ -40,7 +43,7 @@ ota:
 external_components:
   - source:
       type: git
-      url: https://github.com/jimparis/esphome-provisioning
+      url: https://github.com/jimparis/esphome-cfg
     refresh: 1s
 
 preferences:
