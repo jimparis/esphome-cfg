@@ -33,7 +33,6 @@ factory_reset:
 # Support logging, but not to UART (since it's used by dimmer)
 logger:
   baud_rate: 0
-  level: VERBOSE
 
 api:
 
