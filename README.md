@@ -1,7 +1,7 @@
 # ESPHome Device Setup
 
 These scripts and configuration contain the main configuration and
-components for custom ESPHome hardware.  When flashed on to a device,
+components for various ESPHome devices.  When flashed on to a device,
 they can be given WiFi credentials through a captive portal, and
 adopted into ESPHome dashboard automatically.
 
@@ -12,7 +12,9 @@ adopted into ESPHome dashboard automatically.
 - Visit 192.168.4.1 and configure WiFi credentials
 - Visit ESPHome and adopt the device
 
-## ESP based modules
+
+
+## Misc ESP based modules (Gosund, Treatlife, BN-Link)
 
 ### Build .bin for flashing via existing Tasmota:
 
@@ -30,6 +32,8 @@ fresh provisioned state, erase first:
 ### Flash via OTA over existing esphome firmware
 
     make flash-gosund-dimmer TARGET=gosund-dimmer-aabbcc.local
+
+
 
 ## ELEGRP DPR10 Dimmer Switch
 
@@ -91,3 +95,33 @@ See what devices are advertising with
 Look for `package_import_url` in the `txt` record to make sure
 adoption in esphome UI will work.  URL must be 44 chars or less
 on bk7231n platform.
+
+
+
+## Secboard 2.0 (Vista home security interface)
+
+Using Dan's [Secboard 2.0](https://git.jim.sh/dan/esp32-home-interface)
+
+![](images/secboard.png)
+
+Connections:
+
+| J1 pin | Color  | Panel        | ESP32                         |
+|--------|--------|--------------|-------------------------------|
+| 1      | Yellow | ECP Data Out | GPIO22 (rx)                   |
+| 2      | Red    | 12V          |                               |
+| 3      | Green  | ECP Data In  | GPIO21 (tx), GPIO18 (monitor) |
+| 4      | Black  | GND          | GND                           |
+
+Config:
+
+```yaml
+  rxpin: 22
+  txpin: 21
+  monitorpin: 18
+  invert_mon: "false"
+  invert_tx: "false"
+  invert_rx: "false"
+  input_mode_rx: INPUT_PULLDOWN
+  input_mode_mon: INPUT_PULLUP
+```
