@@ -1,0 +1,141 @@
+substitutions:
+  name: elegrp-spn30
+  friendly_name: ELEGRP Switch
+
+packages:
+  deviceinfo: !include common/deviceinfo.yaml
+  factoryreset: !include common/factoryreset.yaml
+
+dashboard_import:
+  # Limited to 44 chars, see https://github.com/esphome/esphome/issues/11281
+  #                   12345678901234567890123456789012345678901234
+  package_import_url: github://jimparis/esphome-cfg/ele-spn30.yaml
+
+esphome:
+  name: "${name}"
+  friendly_name: "${friendly_name}"
+  name_add_mac_suffix: true
+  project:
+    name: jim.elegrp-spn30
+    version: "1.0"
+
+  # https://github.com/libretiny-eu/libretiny/issues/316
+  platformio_options:
+    build_flags:
+      - -DLWIP_DHCP_DOES_ACD_CHECK=0
+
+bk72xx:
+  board: cb2s
+
+factory_reset:
+  resets_required: 10
+  max_delay: 10s
+
+# Support logging, but not to UART
+logger:
+  baud_rate: 0
+
+api:
+
+ota:
+  - platform: esphome
+
+external_components:
+  - source:
+      type: git
+      url: https://github.com/jimparis/esphome-cfg
+    refresh: 1s
+
+preferences:
+  flash_write_interval: 300s
+
+wifi:
+  ap:
+
+captive_portal:
+
+
+# P23: off button (needs pullup)
+# P6:  on button (needs pullup)
+# P7:  relay (high = closed)
+# P8:  traveler sense (needs pullup, toggle when 120V present?)
+# P24: LED (active low)
+
+binary_sensor:
+  - platform: gpio
+    pin:
+      number: P6
+      mode: INPUT_PULLUP
+      inverted: true
+    name: "Up Button"
+    internal: true
+    on_press:
+      - switch.turn_on: relay_switch
+
+  - platform: gpio
+    pin:
+      number: P23
+      mode: INPUT_PULLUP
+      inverted: true
+    id: !extend main_button
+    name: "Down Button"
+    internal: true
+    on_press:
+      - switch.turn_off: relay_switch
+
+  - platform: gpio
+    pin:
+      number: P8
+      mode: INPUT_PULLUP
+    id: traveler_raw
+    internal: true
+    on_release:
+      - script.execute: traveler_activity
+
+  - platform: template
+    id: traveler_detected
+    name: "Traveler Detected"
+    device_class: power
+    lambda: |-
+      return false;
+    on_press:
+      - switch.toggle: relay_switch
+    on_release:
+      - switch.toggle: relay_switch
+
+switch:
+  - platform: gpio
+    id: relay_switch
+    name: "Relay"
+    pin: P7
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - light.turn_on: wifi_status
+    on_turn_off:
+      - light.turn_off: wifi_status
+
+output:
+  - platform: gpio
+    id: led_output
+    pin:
+      number: P24
+      inverted: true
+
+light:
+  - platform: binary
+    id: wifi_status
+    name: "Status LED"
+    output: led_output
+    restore_mode: ALWAYS_OFF
+
+script:
+  - id: traveler_activity
+    mode: restart
+    then:
+      - binary_sensor.template.publish:
+          id: traveler_detected
+          state: true
+      - delay: 30ms
+      - binary_sensor.template.publish:
+          id: traveler_detected
+          state: false

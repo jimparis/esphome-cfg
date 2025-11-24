@@ -1,8 +1,11 @@
 button:
   - platform: restart
     id: esphome_restart
+    name: "Device Restart"
   - platform: factory_reset
     id: esphome_factory_reset
+    name: "Device Factory Reset"
+    disabled_by_default: true
 
 binary_sensor:
   - platform: gpio
