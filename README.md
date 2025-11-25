@@ -12,7 +12,24 @@ adopted into ESPHome dashboard automatically.
 - Visit 192.168.4.1 and configure WiFi credentials
 - Visit ESPHome and adopt the device
 
+**NOTE**: The way the `dashboard_import` mechanism sets up the
+per-device YAML file in esphome mostly works, but it sets up a
+`package:` line that ends up using the default refresh value of "1d".
+If you want to ensure you're pulling changes from git faster,
+edit the esphome config from
 
+```
+packages:
+  jim.elegrp-dpr10: github://jimparis/esphome-cfg/elegrp.yaml@main
+```
+to
+```
+packages:
+  jim.elegrp-dpr10
+    url: https://github.com/jimparis/esphome-cfg
+    file: elegrp.yaml
+    refresh: 0s
+```
 
 ## Misc ESP based modules (Gosund, Treatlife, BN-Link)
 
