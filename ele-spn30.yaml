@@ -79,7 +79,7 @@ binary_sensor:
     name: "Up Button"
     internal: true
     on_press:
-      - switch.turn_on: relay_switch
+      - light.turn_on: relay_light
       - logger.log:
           level: DEBUG
           format: "Up button pressed -> Relay ON"
@@ -93,7 +93,7 @@ binary_sensor:
     name: "Down Button"
     internal: true
     on_press:
-      - switch.turn_off: relay_switch
+      - light.turn_off: relay_light
       - logger.log:
           level: DEBUG
           format: "Down button pressed -> Relay OFF"
@@ -116,28 +116,20 @@ binary_sensor:
     name: "Traveler Detected"
     device_class: power
     on_press:
-      - switch.toggle: relay_switch
+      - light.toggle: relay_light
       - logger.log:
           level: DEBUG
           format: "Traveler detected -> toggling relay"
     on_release:
-      - switch.toggle: relay_switch
+      - light.toggle: relay_light
       - logger.log:
           level: DEBUG
           format: "Traveler cleared -> toggling relay"
-
-switch:
-  - platform: gpio
-    id: relay_switch
-    name: "Relay"
-    pin: P7
-    restore_mode: RESTORE_DEFAULT_OFF
-    on_turn_on:
-      - light.turn_on: wifi_status
-    on_turn_off:
-      - light.turn_off: wifi_status
-
 output:
+  - platform: gpio
+    id: relay_output
+    pin: P7
+
   - platform: gpio
     id: led_output
     pin:
@@ -145,6 +137,16 @@ output:
       inverted: true
 
 light:
+  - platform: binary
+    id: relay_light
+    name: "Relay"
+    output: relay_output
+    restore_mode: RESTORE_DEFAULT_OFF
+    on_turn_on:
+      - light.turn_on: wifi_status
+    on_turn_off:
+      - light.turn_off: wifi_status
+
   - platform: status_led
     id: wifi_status
     name: "Status LED"
