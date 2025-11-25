@@ -1,6 +1,7 @@
 substitutions:
   name: elegrp-spn30
   friendly_name: ELEGRP Switch
+  traveler_hot_hold_ms: "250"
 
 packages:
   deviceinfo: !include common/deviceinfo.yaml
@@ -34,6 +35,9 @@ factory_reset:
 # Support logging, but not to UART
 logger:
   baud_rate: 0
+  level: DEBUG
+  logs:
+    binary_sensor: WARN
 
 api:
 
@@ -48,6 +52,11 @@ external_components:
 
 preferences:
   flash_write_interval: 300s
+
+globals:
+  - id: traveler_last_edge
+    type: uint32_t
+    initial_value: '0'
 
 wifi:
   ap:
@@ -71,6 +80,9 @@ binary_sensor:
     internal: true
     on_press:
       - switch.turn_on: relay_switch
+      - logger.log:
+          level: DEBUG
+          format: "Up button pressed -> Relay ON"
 
   - platform: gpio
     pin:
@@ -82,6 +94,9 @@ binary_sensor:
     internal: true
     on_press:
       - switch.turn_off: relay_switch
+      - logger.log:
+          level: DEBUG
+          format: "Down button pressed -> Relay OFF"
 
   - platform: gpio
     pin:
@@ -89,19 +104,27 @@ binary_sensor:
       mode: INPUT_PULLUP
     id: traveler_raw
     internal: true
+    on_press:
+      - lambda: |-
+          id(traveler_last_edge) = esphome::millis();
     on_release:
-      - script.execute: traveler_activity
+      - lambda: |-
+          id(traveler_last_edge) = esphome::millis();
 
   - platform: template
     id: traveler_detected
     name: "Traveler Detected"
     device_class: power
-    lambda: |-
-      return false;
     on_press:
       - switch.toggle: relay_switch
+      - logger.log:
+          level: DEBUG
+          format: "Traveler detected -> toggling relay"
     on_release:
       - switch.toggle: relay_switch
+      - logger.log:
+          level: DEBUG
+          format: "Traveler cleared -> toggling relay"
 
 switch:
   - platform: gpio
@@ -122,20 +145,20 @@ output:
       inverted: true
 
 light:
-  - platform: binary
+  - platform: status_led
     id: wifi_status
     name: "Status LED"
     output: led_output
     restore_mode: ALWAYS_OFF
 
-script:
-  - id: traveler_activity
-    mode: restart
+# if we see any edge on the traveler pin recently assume the traveler
+# line is hot.  In theory this should happen at 60 Hz, but in practice
+# we can have long delays due to polling patterns, internal flash
+# writes, etc.  Having a longer delay in practice doesn't feel too
+# laggy.
+interval:
+  - interval: 50ms
     then:
-      - binary_sensor.template.publish:
-          id: traveler_detected
-          state: true
-      - delay: 30ms
-      - binary_sensor.template.publish:
-          id: traveler_detected
-          state: false
+      - lambda: |-
+          const bool state = (esphome::millis() - id(traveler_last_edge)) < ${traveler_hot_hold_ms};
+          id(traveler_detected).publish_state(state);
