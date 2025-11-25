@@ -139,7 +139,7 @@ output:
 light:
   - platform: binary
     id: relay_light
-    name: "Relay"
+    name: "Light"
     output: relay_output
     restore_mode: RESTORE_DEFAULT_OFF
     on_turn_on:
@@ -150,6 +150,7 @@ light:
   - platform: status_led
     id: wifi_status
     name: "Status LED"
+    internal: true
     output: led_output
     restore_mode: ALWAYS_OFF
 
