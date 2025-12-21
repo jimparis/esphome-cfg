@@ -76,12 +76,12 @@ binary_sensor:
 
 output:
   - platform: esp8266_pwm
-    id: blue_led
+    id: red_led
     pin:
       number: GPIO1
       inverted: true
   - platform: esp8266_pwm
-    id: red_led
+    id: blue_led
     pin:
       number: GPIO13
       inverted: true
