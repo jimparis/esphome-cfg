@@ -24,6 +24,13 @@ esphome:
   on_boot:
     priority: 300
     then:
+      - if:
+          condition:
+            switch.is_on: relay_switch
+          then:
+            - light.turn_on: relay_status
+          else:
+            - light.turn_off: relay_status
       - light.turn_on: wifi_status
       - delay: 500ms
       - while:
