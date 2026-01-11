@@ -77,7 +77,7 @@ binary_sensor:
       mode: INPUT_PULLUP
       inverted: true
     name: "Up Button"
-    internal: true
+    internal: false
     on_press:
       - light.turn_on: relay_light
       - logger.log:
@@ -91,7 +91,7 @@ binary_sensor:
       inverted: true
     id: !extend main_button
     name: "Down Button"
-    internal: true
+    internal: false
     on_press:
       - light.turn_off: relay_light
       - logger.log:
